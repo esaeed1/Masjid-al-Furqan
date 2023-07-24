@@ -40,6 +40,13 @@ Vertical screenn
 
 Screen Configuration
 
+_____________________________________________________
+
+Let screen not turn off 
+
+sudo raspi-config
+Display Options
+Select "Screen Blanking" and choose the option "Disable" to prevent the screen from turning off.
 
 
 
