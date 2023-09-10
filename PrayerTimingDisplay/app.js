@@ -1,4 +1,4 @@
-var prayers = require('prayers');
+const prayers = require('./prayers');
 var express = require('express');
 var fs = require('fs');
 var app = express();
