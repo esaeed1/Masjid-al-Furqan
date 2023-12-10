@@ -90,6 +90,6 @@ function hijriDate(adjustment) {
         "Jumadal Ula", "Jumadal Akhira", "Rajab", "Sha'ban",
         "Ramadan", "Shawwal", "Dhul Qa'ada", "Dhul Hijja");
     var iDate = kuwaiticalendar(adjustment);
-    var outputIslamicDate = iDate[5]-1 + " " + iMonthNames[iDate[6]] + ", " + iDate[7];
+    var outputIslamicDate = iDate[5] + " " + iMonthNames[iDate[6]] + ", " + iDate[7];
     return outputIslamicDate;
 }

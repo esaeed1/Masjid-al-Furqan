@@ -21,6 +21,7 @@
     <!-- angular app js files -->
    <script src="assets/js/Angular/angular.js"></script>
    <script src="assets/js/Angular/hijriCalendar.js"></script>
+   <script src="assets/js/Angular/hijriToJSDate.js"></script>
    <script src="assets/js/Angular/app.js"></script>
 	
 
@@ -56,7 +57,15 @@
                     </div>
                 </div>
             </nav>
-
+            
+            <nav class="navbar navbar-inverse">
+                <div class="container-fluid">
+                    <div class="row">
+                        <h2 class="ramadan">{{daysTillRamadan}} {{daysTillRamadan > 1 ? "days" : "day"}} till Ramadan</h2>
+                    </div>
+                </div>
+            </nav>
+            
             <nav class="navbar navbar-inverse">
                 <div class="container-fluid">
                     <div class="row">

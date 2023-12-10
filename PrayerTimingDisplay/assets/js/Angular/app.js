@@ -5515,7 +5515,9 @@ var getPrayerTiming = function (today) {
                 Prayer: 'Fajr',
                 Athan: ParseTime(TodayPrayers.FajrAthan, 0),
                 Iqama: ParseTime(TodayPrayers.FajrIqama, 0),
-                current: false
+                current: false,
+                athanPlayed: false,
+                iqamaPlayed: false
         },
             {
                 Prayer: 'Sunrise',
@@ -5527,29 +5529,59 @@ var getPrayerTiming = function (today) {
                 Prayer: 'Zuhr',
                 Athan: ParseTime(TodayPrayers.ZuhrAthan, 1),
                 Iqama: ParseTime(TodayPrayers.ZuhrIqama, 1),
-                current: false
+                current: false,
+                athanPlayed: false,
+                iqamaPlayed: false
         },
             {
                 Prayer: 'Asr',
                 Athan: ParseTime(TodayPrayers.AsrAthan, 1),
                 Iqama: ParseTime(TodayPrayers.AsrIqama, 1),
-                current: false
+                current: false,
+                athanPlayed: false,
+                iqamaPlayed: false
         },
             {
                 Prayer: 'Maghrib',
                 Athan: ParseTime(TodayPrayers.MaghribAthan, 1),
                 Iqama: ParseTime(TodayPrayers.MaghribIqama, 1),
-                current: false
+                current: false,
+                athanPlayed: false,
+                iqamaPlayed: false
         },
             {
                 Prayer: 'Isha',
                 Athan: ParseTime(TodayPrayers.IshaAthan, 1),
                 Iqama: ParseTime(TodayPrayers.IshaIqama, 1),
-                current: false
+                current: false,
+                athanPlayed: false,
+                iqamaPlayed: false
         }],
         Notes: TodayPrayers.Notes
     };
 };
+
+var playAudio = function(filepath) {
+    const audio = new Audio();
+    audio.src = filepath;
+    audio.load();
+    return audio.play();
+}
+
+var daysTillRamadan = function(adjustment) {
+    const calendar = kuwaiticalendar(adjustment);
+    const hijriYear = calendar[7], hijriMonth = calendar[6];
+    
+    var nextRamadanDate;
+    if (hijriMonth < 8) { // not yet Ramadan - get days till this year Ramadan
+        nextRamadanDate = hijriToJSDate(hijriYear, 9, 1, 'islamic');
+    } else { // Ramadan has come - get days till next year Ramadan
+        nextRamadanDate = hijriToJSDate(hijriYear + 1, 9, 1, 'islamic');
+    }
+    
+    const oneDay = 1000*60*60*24;
+    return Math.floor((nextRamadanDate - Date.now()) / oneDay);
+}
 
 var MosqueApp = angular.module('MosqueApp', []);
 
@@ -5577,6 +5609,7 @@ MosqueApp.controller('PrayerTimingController', ['$scope', '$timeout', '$http', f
         $scope.Notes = TodayTiming.Notes;
     });
     $scope.hijriDate = hijriDate(hijriDateAdjust);
+    $scope.daysTillRamadan = daysTillRamadan(hijriDateAdjust);
 
     updatePrayerTimeTable = function () {
         // a request to server to get date will go here
@@ -5590,6 +5623,7 @@ MosqueApp.controller('PrayerTimingController', ['$scope', '$timeout', '$http', f
                 $scope.Notes = TodayTiming.Notes;
             });
             $scope.hijriDate = hijriDate(hijriDateAdjust);
+            $scope.daysTillRamadan = daysTillRamadan(hijriDateAdjust);
         }
         $timeout(updatePrayerTimeTable, $scope.tickInterval); // reset the timer
     };
@@ -5617,6 +5651,38 @@ MosqueApp.controller('PrayerTimingController', ['$scope', '$timeout', '$http', f
         };
         $timeout(countDownTimer, $scope.tickInterval); // reset the timer
     };
+    
+    var adhanIqamaPlayer = function () {
+        now = $scope.date; // get the current time
+        day = today.getDay(); // Friday will return 5
+        
+        for (i = 0; i < $scope.Prayers.length; i++) {
+            // don't play athan/iqama for sunrise or Jumuah
+            if (($scope.Prayers[i].Prayer !== "Sunrise") && !(($scope.Prayers[i].Prayer === "Zuhr") && (day === 5))) {
+                iqama = Date.parse($scope.Prayers[i].Iqama);
+                athan = Date.parse($scope.Prayers[i].Athan);
+                const minutesSinceAthan = (now - athan) / 60000;
+                const minutesSinceIqama = (now - iqama) / 60000;
+                
+                if ((minutesSinceAthan < 1) && (minutesSinceAthan > 0) && !($scope.Prayers[i].athanPlayed)) {
+                    const filename = ($scope.Prayers[i].Prayer === "Fajr" ? "Fajr.mp3" : "Adhan.mp3");
+                    playAudio("assets/audio/" + filename);
+                    $scope.Prayers[i].athanPlayed = true;
+                }
+                
+                if ((minutesSinceIqama < 1) && (minutesSinceIqama > 0) && !($scope.Prayers[i].iqamaPlayed)) {
+                    playAudio("assets/audio/Iqamah.mp3");
+                    $scope.Prayers[i].iqamaPlayed = true;
+                }
+            }
+        };
+        $timeout(adhanIqamaPlayer, $scope.tickInterval); // reset the timer
+    };
+    
+    // make sure autoplay is allowed
+    playAudio("assets/audio/blank.mp3").catch(err => {
+        alert("Please enable autoplay to allow for playing athan and iqama");
+    })
 
     // start the timer
     $timeout(clock, $scope.tickInterval);
@@ -5624,6 +5690,8 @@ MosqueApp.controller('PrayerTimingController', ['$scope', '$timeout', '$http', f
     $timeout(updatePrayerTimeTable, $scope.tickInterval);
     // start the timer
     $timeout(countDownTimer, $scope.tickInterval);
+    // start the timer
+    $timeout(adhanIqamaPlayer, $scope.tickInterval);
 }]);
 
 
