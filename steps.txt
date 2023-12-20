@@ -1,3 +1,5 @@
+chrome://settings/content/siteDetails?site=file:///home/admin/Desktop/PrayerTimingDisplay/index.html       <--- to stop autoplay banner
+
 sudo apt update
 nano autostart.sh
 ______________________________________________________
