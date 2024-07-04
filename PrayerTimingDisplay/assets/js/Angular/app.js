@@ -5491,7 +5491,11 @@ PrayerTiming[11] = [{
    "IshaIqama": "06:41"
  }];
 
-var ParseTime = function (timeString, timeFlag) {
+var ParseTime = function (timeString, timeFlag, minuteOffset) {
+    var minOffset = 0
+    if (minuteOffset != null) {
+      minOffset = minuteOffset
+    }
     var date = new Date();
     if (timeFlag === 0) {
         date.setHours(Number(timeString.slice(0, 2)));
@@ -5502,7 +5506,7 @@ var ParseTime = function (timeString, timeFlag) {
             date.setHours(Number(timeString.slice(0, 2)));
         };
     };
-    date.setMinutes(Number(timeString.slice(3, 5)));
+    date.setMinutes(Number(timeString.slice(3, 5)) + minOffset);
     date.setSeconds(0);
     return date;
 };
@@ -5514,7 +5518,7 @@ var getPrayerTiming = function (today) {
         Prayers: [{
                 Prayer: 'Fajr',
                 Athan: ParseTime(TodayPrayers.FajrAthan, 0),
-                Iqama: ParseTime(TodayPrayers.FajrIqama, 0),
+                Iqama: ParseTime(TodayPrayers.FajrAthan, 0, 20),
                 current: false,
                 athanPlayed: false,
                 iqamaPlayed: false
@@ -5552,7 +5556,7 @@ var getPrayerTiming = function (today) {
             {
                 Prayer: 'Isha',
                 Athan: ParseTime(TodayPrayers.IshaAthan, 1),
-                Iqama: ParseTime(TodayPrayers.IshaIqama, 1),
+                Iqama: ParseTime(TodayPrayers.IshaAthan, 1, 7),
                 current: false,
                 athanPlayed: false,
                 iqamaPlayed: false
